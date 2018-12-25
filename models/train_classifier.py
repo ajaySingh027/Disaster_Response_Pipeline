@@ -71,7 +71,7 @@ def build_model():
     ## OneVsRestClassifier(LinearSVC())
 
      # create grid search object
-     parameters = {
+    parameters = {
                     'clf__min_samples_split': [2, 3, 4],
                     'clf__estimator__learning_rate': [0.001, 0.01, 0.1],
                     'tfidf__smooth_idf': [True, False]
@@ -82,11 +82,11 @@ def build_model():
 
 def evaluate_model(model, X_test, Y_test, category_names):
     y_pred = model.prodict(X_test)
-    print(classification_report(y_test, y_pred, target_names=category_names))
+    print(classification_report(Y_test, y_pred, target_names=category_names))
 
 
 def save_model(model, model_filepath):
-    pass
+    pickle.dump(model, open(model_filepath, 'wb'))
 
 
 def main():
