@@ -27,7 +27,20 @@ nltk.download('stopwords')
 nltk.download('wordnet')
 
 def load_data(database_filepath):
-    pass
+    # load data from database
+    engine = create_engine('sqlite:///' +database_filepath)
+    df = pd.read_sql_table('DisasterRespTabl', engine)
+    X = df['message'].values
+    """ Y_values = ['related', 'request', 'offer', 'aid_related', 'medical_help', 'medical_products',
+            'search_and_rescue', 'security', 'military', 'child_alone', 'water', 'food', 'shelter',
+            'clothing', 'money', 'missing_people', 'refugees', 'death', 'other_aid', 'infrastructure_related',
+            'transport', 'buildings', 'electricity', 'tools', 'hospitals', 'shops', 'aid_centers',
+            'other_infrastructure', 'weather_related', 'floods', 'storm', 'fire', 'earthquake', 'cold', 
+            'other_weather', 'direct_report'] """
+    # Y = df[Y_values].values
+    Y = df.columns[4:].values
+    category_names = list(df.columns[4:])
+    return X, Y, category_names
 
 
 def tokenize(text):
