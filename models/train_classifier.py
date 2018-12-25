@@ -44,15 +44,45 @@ def load_data(database_filepath):
 
 
 def tokenize(text):
-    pass
+    # normalize case and remove punctuation
+    text = re.sub(r"[^a-zA-Z0-9]", "", text.lower())
+    
+    #tokenize text
+    tokens = word_tokenize(text)
+    
+    # lemmatize and remove stop words
+    stop_words = stopwords.words("english")
+    lemmatizer = WordNetLemmatizer()
+    tokens = [lemmatizer.lemmatize(word) for word in tokens if word not in stop_words]
+    
+    return tokens
+
 
 
 def build_model():
-    pass
+    pipeline = Pipeline([
+                    ('vect', CountVectorizer(tokenizer=tokenize)),
+                    ('tfidf', TfidfTransformer()),
+                    ('clf', MultiOutputClassifier(RandomForestClassifier()))
+    ])
+
+    #For reference:
+    ## RandomForestClassifier(random_state=100)
+    ## OneVsRestClassifier(LinearSVC())
+
+     # create grid search object
+     parameters = {
+                    'clf__min_samples_split': [2, 3, 4],
+                    'clf__estimator__learning_rate': [0.001, 0.01, 0.1],
+                    'tfidf__smooth_idf': [True, False]
+                    }
+    model = GridSearchCV(pipeline, param_grid=parameters, cv=2, n_jobs=-1)
+    return model
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
-    pass
+    y_pred = model.prodict(X_test)
+    print(classification_report(y_test, y_pred, target_names=category_names))
 
 
 def save_model(model, model_filepath):
