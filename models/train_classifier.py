@@ -2,6 +2,7 @@
 import pandas as pd
 import numpy as np
 import sys
+import pickle
 
 from sqlalchemy import create_engine
 from nltk.tokenize import word_tokenize
