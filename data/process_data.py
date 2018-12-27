@@ -8,9 +8,12 @@ import sys
 
 def load_data(messages_filepath, categories_filepath):
     """
-        Reading csv files and creatinf Dataframes
+        Loading csv data files and creating Dataframes
+
+        Input:
+            messages_filepath : Messages dataset
+            categories_filepath : Categories dataset
     """
-    
     messages = pd.read_csv(messages_filepath)
     categories = pd.read_csv(categories_filepath)
     df = pd.merge(messages, categories, on='id')
@@ -20,7 +23,10 @@ def load_data(messages_filepath, categories_filepath):
 
 def clean_data(df):
     """
-        removing unwanted data columns/rows and cleaning 
+        Removing unwanted data columns/rows and cleaning the data 
+        for performing the transforming of data
+
+        Input: Merged dataframe
     """
     categories = df['categories'].str.split(";", expand=True)
     
@@ -63,9 +69,12 @@ def clean_data(df):
 
 def save_data(df, database_filename):
     """
-        saving the dataframe cleaned data in sqlite db
-    """
+        saving the cleaned data in sqlite db
 
+        Input: 
+            df : cleaned dataframe
+            database_filename : location for storing in the database
+    """
     engine = create_engine('sqlite:///' + database_filename)
     df.to_sql('DisasterTable', engine, index=False)  
 
