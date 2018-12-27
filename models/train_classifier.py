@@ -28,7 +28,11 @@ nltk.download('stopwords')
 nltk.download('wordnet')
 
 def load_data(database_filepath):
-    # load data from database
+    """
+        Loads the cleaned dataframe from the stored Database 
+        Input: filepath location of database
+        Output: X values, Y values, category names
+    """
     engine = create_engine('sqlite:///' +database_filepath)
     df = pd.read_sql_table('DisasterTable', engine)
     X = df['message'].values
@@ -45,6 +49,13 @@ def load_data(database_filepath):
 
 
 def tokenize(text):
+    """
+        Function to perform the tokonization/Lemmetization of text data.
+        Text is split into words and also punctuation is cleaned.
+
+        Input: text
+        Output: list of tokenized words
+    """
     # normalize case and remove punctuation
     text = re.sub(r"[^a-zA-Z0-9]", "", text.lower())
     
@@ -61,6 +72,11 @@ def tokenize(text):
 
 
 def build_model():
+    """
+        ML Pipeline for creating model
+        Uses CountVectorizer and TfidfTransformer for creating pipeline
+        GridSearchCV is used for tuning of model with paramters
+    """
     pipeline = Pipeline([
                     ('vect', CountVectorizer(tokenizer=tokenize)),
                     ('tfidf', TfidfTransformer()),
@@ -81,11 +97,27 @@ def build_model():
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
+    """
+        Prediction is done on trained model with test data.
+        And Classification report is used to display accuracy, precision, recall
+
+        Input: -
+          Model : Trained model to evaluate
+          X_test : data for prediction on Trained model
+          Y_test : prediction data to be compared with
+          category_names : Categories list 
+    """
     y_pred = model.predict(X_test)
     print(classification_report(Y_test, y_pred, target_names=category_names))
 
 
 def save_model(model, model_filepath):
+    """ Saving the tuned model
+
+        Input:-
+            Model : Final tuned model
+            model_filepath : Location for saving the model
+    """
     pickle.dump(model, open(model_filepath, 'wb'))
 
 
