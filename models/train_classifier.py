@@ -30,16 +30,16 @@ nltk.download('wordnet')
 def load_data(database_filepath):
     # load data from database
     engine = create_engine('sqlite:///' +database_filepath)
-    df = pd.read_sql_table('DisasterRespTabl', engine)
+    df = pd.read_sql_table('DisasterTable', engine)
     X = df['message'].values
-    """ Y_values = ['related', 'request', 'offer', 'aid_related', 'medical_help', 'medical_products',
+    Y_values = ['related', 'request', 'offer', 'aid_related', 'medical_help', 'medical_products',
             'search_and_rescue', 'security', 'military', 'child_alone', 'water', 'food', 'shelter',
             'clothing', 'money', 'missing_people', 'refugees', 'death', 'other_aid', 'infrastructure_related',
             'transport', 'buildings', 'electricity', 'tools', 'hospitals', 'shops', 'aid_centers',
             'other_infrastructure', 'weather_related', 'floods', 'storm', 'fire', 'earthquake', 'cold', 
-            'other_weather', 'direct_report'] """
-    # Y = df[Y_values].values
-    Y = df.columns[4:].values
+            'other_weather', 'direct_report']
+    Y = df[Y_values].values
+    #Y = df.columns[4:].values
     category_names = list(df.columns[4:])
     return X, Y, category_names
 
@@ -73,16 +73,15 @@ def build_model():
 
      # create grid search object
     parameters = {
-                    'clf__min_samples_split': [2, 3, 4],
-                    'clf__estimator__learning_rate': [0.001, 0.01, 0.1],
-                    'tfidf__smooth_idf': [True, False]
+                    'tfidf__smooth_idf': [True, False],
+                    'clf__estimator__n_estimators':[50, 100]
                     }
     model = GridSearchCV(pipeline, param_grid=parameters, cv=2, n_jobs=-1)
     return model
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
-    y_pred = model.prodict(X_test)
+    y_pred = model.predict(X_test)
     print(classification_report(Y_test, y_pred, target_names=category_names))
 
 

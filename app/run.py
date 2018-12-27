@@ -7,7 +7,7 @@ from nltk.tokenize import word_tokenize
 
 from flask import Flask
 from flask import render_template, request, jsonify
-from plotly.graph_objs import Bar
+from plotly.graph_objs import Bar, Histogram
 from sklearn.externals import joblib
 from sqlalchemy import create_engine
 
@@ -26,11 +26,11 @@ def tokenize(text):
     return clean_tokens
 
 # load data
-engine = create_engine('sqlite:///../data/YourDatabaseName.db')
-df = pd.read_sql_table('YourTableName', engine)
+engine = create_engine('sqlite:///../data/DisasterResponse.db')
+df = pd.read_sql_table('DisasterTable', engine)
 
 # load model
-model = joblib.load("../models/your_model_name.pkl")
+model = joblib.load("../models/DisPipeline_model.pic")
 
 
 # index webpage displays cool visuals and receives user input text for model
@@ -39,28 +39,89 @@ model = joblib.load("../models/your_model_name.pkl")
 def index():
     
     # extract data needed for visuals
-    # TODO: Below is an example - modify to extract data for your own visuals
-    genre_counts = df.groupby('genre').count()['message']
-    genre_names = list(genre_counts.index)
+    # Calculate message count by genre with related status
+    genre_related = df[df['related']==1].groupby('genre').count()['message']
+    genre_not_related = df[df['related']==0].groupby('genre').count()['message']
+    genre_names = list(genre_related.index)
     
+    # Each Message's category wise count
+    categories = df.columns[4:].tolist()
+    messgs_recv = df.iloc[:, 4:].sum().tolist()
+
+    # Messages containing weather related text graphs
+    df_weather = df[['weather_related', 'floods', 'storm', 'fire', 'earthquake', 'cold','other_weather']].mean()
+    weather_mean = df_weather
+    weather_names = df_weather.index
+
+
     # create visuals
-    # TODO: Below is an example - modify to create your own visuals
+    
     graphs = [
         {
             'data': [
                 Bar(
                     x=genre_names,
-                    y=genre_counts
+                    y=genre_related,
+                    name='Related'
+                ),
+
+                Bar(
+                    x=genre_names,
+                    y=genre_not_related,
+                    name='Not Related'
                 )
             ],
 
             'layout': {
-                'title': 'Distribution of Message Genres',
+                'title': 'Distribution of Messages by Genres with Related status',
                 'yaxis': {
                     'title': "Count"
                 },
                 'xaxis': {
                     'title': "Genre"
+                }
+            }
+        },
+
+
+        {
+            'data': [
+                Histogram(
+                    x = categories,
+                    y = messgs_recv,
+                    histfunc='sum',
+                    marker=dict(color='green')
+                )
+            ],
+
+            'layout': {
+                'title': 'Frequency distribution of Categories of Messages',
+                'yaxis': {
+                    'title': "Frequency of Message Category"
+                },
+                'xaxis': {
+                    'title': "Categories"
+                }
+            }
+        },
+
+
+        {
+            'data': [
+                Bar(
+                    x = weather_names,
+                    y = weather_mean,
+                    marker= dict(color='dimgray')
+                )
+            ],
+
+            'layout': {
+                'title': 'Weather related Messages received',
+                'yaxis': {
+                    'title': "% of all messages"
+                },
+                'xaxis': {
+                    'title': "Type of Message"
                 }
             }
         }
@@ -93,7 +154,7 @@ def go():
 
 
 def main():
-    app.run(host='0.0.0.0', port=3001, debug=True)
+    app.run(host='localhost', port=3001, debug=True)
 
 
 if __name__ == '__main__':
