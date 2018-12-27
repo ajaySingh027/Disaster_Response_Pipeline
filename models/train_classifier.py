@@ -80,18 +80,20 @@ def build_model():
     pipeline = Pipeline([
                     ('vect', CountVectorizer(tokenizer=tokenize)),
                     ('tfidf', TfidfTransformer()),
-                    ('clf', MultiOutputClassifier(RandomForestClassifier()))
+                    ('clf', MultiOutputClassifier(OneVsRestClassifier(LinearSVC())))
     ])
 
     #For reference:
     ## RandomForestClassifier(random_state=100)
-    ## OneVsRestClassifier(LinearSVC())
+    ## OneVsRestClassifier(LinearSVC()
 
      # create grid search object
     parameters = {
-                    'tfidf__smooth_idf': [True, False],
-                    'clf__estimator__n_estimators':[50, 100]
-                    }
+                    'clf__estimator__estimator__class_weight': ['balanced',None],
+                    'clf__estimator__estimator__C': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                    'clf__estimator__estimator__max_iter':[100,500,1000]
+                  }
+
     model = GridSearchCV(pipeline, param_grid=parameters, cv=2, n_jobs=-1)
     return model
 
